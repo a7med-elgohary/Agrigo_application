@@ -71,7 +71,7 @@ class RegisterBloc extends Bloc<RegisterEvent, RegisterState> {
       }}");
 
       final response = await dio.post(
-        'https://green-lilac-pi.vercel.app/api/auth/register', // عنوان الـ API
+        'https://green-api-ten.vercel.app/api/auth/register', // عنوان الـ API
         data: {
           'name': event.name,
           'email': event.email,

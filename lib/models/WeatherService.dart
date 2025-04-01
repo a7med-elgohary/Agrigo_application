@@ -2,23 +2,55 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class WeatherService {
-  static const String _rapidApiKey = '24405c5fb7msh97c7ea8a489bcfdp1b30e9jsn4eee0bca0075';
-  static const String _rapidApiHost = 'https://weather-api167.p.rapidapi.com/weather/current';
+  static const String _apiKey = '17b898f0809c026e0b5a970cb1c353b5';
+  static const String _apiUrl = 'https://api.openweathermap.org/data/3.0/onecall';
 
-  Future<Map<String, dynamic>> getCurrentWeather() async {
-    final response = await http.get(
-      Uri.parse('https://$_rapidApiHost/api/weather/current?place=London%2CGB&units=metric&lang=en&mode=json'),
-      headers: {
-        'Accept': 'application/json',
-        'x-rapidapi-host': _rapidApiHost,
-        'x-rapidapi-key': _rapidApiKey,
-      },
-    );
+  Future<Map<String, dynamic>> getMansouraWeather() async {
+    double latitude = 31.0409;
+    double longitude = 31.3785;
 
-    if (response.statusCode == 200) {
-      return json.decode(response.body);
-    } else {
-      throw Exception('Failed to load weather data: ${response.statusCode}');
+    try {
+      final response = await http.get(
+        Uri.parse('$_apiUrl?lat=$latitude&lon=$longitude&exclude=minutely,hourly,alerts&units=metric&lang=ar&appid=$_apiKey'),
+      );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return _parseWeatherData(data);
+      } else {
+        throw Exception('فشل في جلب البيانات: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('حدث خطأ: $e');
     }
+  }
+
+  Map<String, dynamic> _parseWeatherData(Map<String, dynamic> data) {
+    final current = data['current'];
+    final daily = data['daily'][0]; // أول يوم في التوقعات
+    
+    return {
+      'current': {
+        'temp': current['temp'],
+        'feels_like': current['feels_like'],
+        'humidity': current['humidity'],
+        'wind_speed': current['wind_speed'],
+        'weather': current['weather'][0]['description'],
+        'icon': current['weather'][0]['icon'],
+        'sunrise': DateTime.fromMillisecondsSinceEpoch(current['sunrise'] * 1000),
+        'sunset': DateTime.fromMillisecondsSinceEpoch(current['sunset'] * 1000),
+      },
+      'daily': {
+        'temp': {
+          'day': daily['temp']['day'],
+          'min': daily['temp']['min'],
+          'max': daily['temp']['max'],
+        },
+        'weather': daily['weather'][0]['main'],
+      },
+    };
   }
 }

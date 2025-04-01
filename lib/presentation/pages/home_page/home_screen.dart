@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+import '../PlanetDetail/PlantDetailScreen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -27,11 +30,13 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _fetchWeatherData() async {
     try {
       final response = await http.get(
-        Uri.parse('https://weather-api167.p.rapidapi.com/api/weather/current?place=London%2CGB&units=metric&lang=en&mode=json'),
+        Uri.parse(
+            'https://weather-api167.p.rapidapi.com/api/weather/current?place=Cairo%2CEG&units=metric&lang=en&mode=json'),
         headers: {
           'Accept': 'application/json',
           'x-rapidapi-host': 'weather-api167.p.rapidapi.com',
-          'x-rapidapi-key': '24405c5fb7msh97c7ea8a489bcfdp1b30e9jsn4eee0bca0075',
+          'x-rapidapi-key':
+              '24405c5fb7msh97c7ea8a489bcfdp1b30e9jsn4eee0bca0075',
         },
       );
 
@@ -60,6 +65,13 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
+        automaticallyImplyLeading: false,
+        leading: IconButton(
+          icon: Icon(Icons.menu, color: Colors.green),
+          onPressed: () {
+            Navigator.pushNamed(context, '/profile');
+          },
+        ),
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -119,7 +131,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              "${_weatherData['temp'].round()}°",
+              "${(_weatherData['temp'] as num?)?.round() ?? 'N/A'}°",
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 48,
@@ -127,7 +139,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             Text(
-              _weatherData['condition'],
+              _weatherData['condition'] ?? 'N/A',
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 16,
@@ -135,7 +147,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              "Max: ${_weatherData['temp_max'].round()}°  Min: ${_weatherData['temp_min'].round()}°",
+              "Max: ${(_weatherData['temp_max'] as num?)?.round() ?? 'N/A'}°  Min: ${(_weatherData['temp_min'] as num?)?.round() ?? 'N/A'}°",
               style: const TextStyle(
                 color: Colors.white70,
                 fontSize: 14,
@@ -148,7 +160,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   IconData _getWeatherIcon() {
-    switch (_weatherData['condition'].toString().toLowerCase()) {
+    final condition = _weatherData['condition']?.toString().toLowerCase() ?? '';
+    switch (condition) {
       case 'clouds':
         return Icons.cloud;
       case 'rain':
@@ -190,7 +203,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildPlantList() {
-    return const Column(
+    return Column(
       children: [
         _PlantCard(
           image: 'assets/images/plant1.png',
@@ -257,7 +270,45 @@ class _HomeScreenState extends State<HomeScreen> {
           _NavBarItem(
             iconPath: 'assets/icons/profile.png',
             isSelected: false,
-            onTap: () {},
+            onTap: () async {
+              final ImagePicker picker = ImagePicker();
+
+              showModalBottomSheet(
+                context: context,
+                builder: (BuildContext context) {
+                  return Wrap(
+                    children: [
+                      ListTile(
+                        leading: Icon(Icons.camera),
+                        title: Text('التقاط صورة'),
+                        onTap: () async {
+                          final XFile? image = await picker.pickImage(
+                              source: ImageSource.camera);
+                          Navigator.pop(context); // إغلاق القائمة
+                          if (image != null) {
+                            File selectedImage = File(image.path);
+                            print("تم التقاط الصورة: ${selectedImage.path}");
+                          }
+                        },
+                      ),
+                      ListTile(
+                        leading: Icon(Icons.photo_library),
+                        title: Text('اختيار من المعرض'),
+                        onTap: () async {
+                          final XFile? image = await picker.pickImage(
+                              source: ImageSource.gallery);
+                          Navigator.pop(context); // إغلاق القائمة
+                          if (image != null) {
+                            File selectedImage = File(image.path);
+                            print("تم اختيار الصورة: ${selectedImage.path}");
+                          }
+                        },
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
           ),
           _NavBarItem(
             iconPath: 'assets/icons/bookmark.png',
@@ -346,57 +397,71 @@ class _PlantCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.2),
-              blurRadius: 10,
-              offset: const Offset(0, 5),
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PlantDetailsScreen(
+              name: name,
+              family: family,
+              image: image,
             ),
-          ],
-        ),
-        child: Row(
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(20),
-              child: Image.asset(
-                image,
-                width: 100,
-                height: 100,
-                fit: BoxFit.cover,
+          ),
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.2),
+                blurRadius: 10,
+                offset: const Offset(0, 5),
               ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    name,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    family,
-                    style: const TextStyle(
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
+            ],
+          ),
+          child: Row(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: Image.asset(
+                  image,
+                  width: 100,
+                  height: 100,
+                  fit: BoxFit.cover,
+                ),
               ),
-            ),
-            IconButton(
-              icon: const Icon(Icons.add, color: Colors.green),
-              onPressed: () {},
-            ),
-          ],
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      family,
+                      style: const TextStyle(
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.add, color: Colors.green),
+                onPressed: () {},
+              ),
+            ],
+          ),
         ),
       ),
     );

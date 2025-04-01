@@ -20,9 +20,11 @@ dependencies:
   provider: ^6.0.5
   geolocator: ^9.0.2
   flutter_dotenv: ^5.2.1
+  image_picker: ^1.0.7
+  hive_generator: ^2.0.0
+  build_runner: ^2.1.11
+geolocator: ^9.0.2
 weather: ^2.0.1
-
-
 
 flutter_launcher_icons:
   android: true
