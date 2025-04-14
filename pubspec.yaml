@@ -1,0 +1,52 @@
+name: agrigo_v3
+description: AgriGo Flutter Application
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  dio: ^5.4.0
+  http: ^1.1.0
+  flutter_bloc: ^8.1.3
+  equatable: ^2.0.5
+  flutter_svg: ^2.0.7
+  shared_preferences: ^2.2.2
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  provider: ^6.0.5
+  geolocator: ^9.0.2
+  flutter_dotenv: ^5.2.1
+  image_picker: ^1.0.4
+  hive_generator: ^2.0.0
+  build_runner: ^2.4.6
+  weather: ^3.2.1
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/Logo.png"
+  adaptive_icon_background: "#ffffff"  
+  adaptive_icon_foreground: "assets/images/Logo.png"
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+  flutter_launcher_icons: ^0.13.1
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/BackGround.jpg
+    - assets/images/login.jpg
+    - assets/images/Logo.png
+    - assets/images/plant1.png
+    - assets/icons/bookmark.png
+    - assets/icons/home.png
+    - assets/icons/stats.png
+    - assets/icons/chat.png
+    - assets/icons/profile.png
